@@ -1,0 +1,29 @@
+name:            boolexpr
+cabal-Version:   >=1.6
+version:         0.1
+license:         BSD3
+license-File:    LICENSE
+copyright:       (c) Nicolas Pouillard
+author:          Nicolas Pouillard
+maintainer:      Nicolas Pouillard <nicolas.pouillard@gmail.com>
+category:        Search, Data Structures, Parsing
+synopsis:        Boolean expressions with various representations and search queries.
+description:     Boolean expressions with various representations and search queries.
+stability:       Provisional
+build-type:      Simple
+
+library
+  build-depends:   base>=3.0, parsec>=2.0&&<3.0
+  exposed-modules: Data.BoolExpr
+                   Data.BoolExpr.Parser
+  ghc-options:     -Wall
+
+source-repository head
+  type:     darcs
+  location: http://code.haskell.org/boolexpr
+
+source-repository this
+  type:     darcs
+  location: http://code.haskell.org/boolexpr
+  tag:      0.1
+
