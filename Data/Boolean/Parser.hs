@@ -1,6 +1,6 @@
-module Data.BoolExpr.Parser
+module Data.Boolean.Parser
   (-- * Parsing function
-   parseBoolExpr
+   parseBoolean
    -- * Language definition and components
   ,languageDef
   ,lexer
@@ -12,33 +12,33 @@ where
 
 import Control.Monad
 import Control.Applicative hiding ((<|>))
-import Data.BoolExpr
+import Data.Boolean
 import Text.ParserCombinators.Parsec
 import qualified Text.ParserCombinators.Parsec.Token as P
 
-{- | Parse a search query as a boolean tree using the following grammar.
+{- | Parse a search query as a boolean expression tree using the following grammar.
      Note that this parser is parameterized over the parser of query simple
-     terms (const).
+     terms (literals).
 
 @
   bt ::= bt AND bt
-        | bt bt -- same as AND
-        | bt OR bt
-        | - bt
-        | ( bt )
-        | const
+       | bt bt -- same as AND
+       | bt OR bt
+       | - bt
+       | ( bt )
+       | const
    const ::= \<given as argument\>
 @
 -}
-parseBoolExpr :: CharParser st a -> CharParser st (BoolExpr a)
-parseBoolExpr parseConst = disj
+parseBoolean :: (Applicative f, Boolean (f a)) => CharParser st a -> CharParser st (f a)
+parseBoolean parseConst = disj
    where disj   = conj   `chainl1` orOp
          conj   = factor `chainl1` andOp
          factor = parens disj <|>
-                  (((symbol "-" >> return BNot) <|> return id) `ap` (BConst `fmap` parseConst))
+                  (((symbol "-" >> return neg) <|> return id) `ap` (pure `fmap` parseConst))
 
-         andOp = BAnd <$ option "" (symbol "AND")
-         orOp  = BOr <$ symbol "OR"
+         andOp = (/\) <$ option "" (symbol "AND")
+         orOp  = (\/) <$ symbol "OR"
 
 -- | Underlying lexer of 'languageDef'
 lexer :: P.TokenParser st

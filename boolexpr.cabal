@@ -13,9 +13,15 @@ stability:       Provisional
 build-type:      Simple
 
 library
-  build-depends:   base>=3.0&&<5, parsec
-  exposed-modules: Data.BoolExpr
-                   Data.BoolExpr.Parser
+  build-depends:   base>=3.0&&<5, parsec, containers,
+                   QuickCheck>=2.1
+  exposed-modules: Data.Boolean
+                   Data.Boolean.Signed
+                   Data.Boolean.CNF
+                   Data.Boolean.DNF
+                   Data.Boolean.BoolExpr
+                   Data.Boolean.BoolExpr.NFAC
+                   Data.Boolean.Parser
   ghc-options:     -Wall
 
 source-repository head
