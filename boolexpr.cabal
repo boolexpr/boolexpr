@@ -13,17 +13,11 @@ stability:       Provisional
 build-type:      Simple
 
 library
-  build-depends:   base>=3.0&&<5, parsec>=2.0&&<3.0
+  build-depends:   base>=3.0&&<5, parsec
   exposed-modules: Data.BoolExpr
                    Data.BoolExpr.Parser
   ghc-options:     -Wall
 
 source-repository head
-  type:     darcs
-  location: http://code.haskell.org/boolexpr
-
-source-repository this
-  type:     darcs
-  location: http://code.haskell.org/boolexpr
-  tag:      0.1
-
+  type:     git
+  location: https://github.com/np/boolexpr.git
