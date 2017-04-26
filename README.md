@@ -3,11 +3,15 @@ Haskell library for Boolean expressions with various representations and search 
 
 ## Query parser
 
-in ghci: `runParser (parseBoolExpr identifier) () "" "(a OR b) AND (n OR m) NOT (x OR y)"`
+Run in ghci:
+
+```
+runParser (parseBoolExpr identifier) () "" "(a OR b) AND (n OR m) NOT (x OR y)"
 
 Right (BAnd (BAnd (BOr (BConst "a") (BConst "b")) (BOr (BConst "n") (BConst "m"))) (BNot (BOr (BConst "x") (BConst "y"))))
 
 it :: Either ParseError (BoolExpr String)
+```
 
 ## Matching example
 
