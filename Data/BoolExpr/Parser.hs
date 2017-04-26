@@ -1,6 +1,7 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Data.BoolExpr.Parser
   (-- * Parsing function
-   parseBoolExpr
+  parseBoolExpr
    -- * Language definition and components
   ,languageDef
   ,lexer
@@ -11,7 +12,6 @@ module Data.BoolExpr.Parser
 where
 
 import Control.Monad
-import Control.Applicative hiding ((<|>))
 import Data.BoolExpr
 import Text.ParserCombinators.Parsec
 import qualified Text.ParserCombinators.Parsec.Token as P
@@ -34,8 +34,14 @@ parseBoolExpr :: CharParser st a -> CharParser st (BoolExpr a)
 parseBoolExpr parseConst = disj
    where disj   = conj   `chainl1` orOp
          conj   = factor `chainl1` andOp
-         factor = parens disj <|>
-                  (((symbol "-" >> return BNot) <|> return id) `ap` (BConst `fmap` parseConst))
+         factor =     (  (symbol "-" >> return BNot  )
+                     <|> (symbol "NOT" >> return BNot)
+                     <|> (return id                  )
+                      ) 
+                      `ap` 
+                         (  parens disj 
+                        <|> BConst `fmap` parseConst
+                         )
 
          andOp = BAnd <$ option "" (symbol "AND")
          orOp  = BOr <$ symbol "OR"

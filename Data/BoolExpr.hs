@@ -37,7 +37,7 @@ module Data.BoolExpr
   where
 
 -- import Test.QuickCheck hiding (Positive)
-import Control.Applicative
+-- import Control.Applicative
 import Data.Monoid (Monoid(..))
 import Data.Foldable (Foldable(..))
 import Data.Traversable
