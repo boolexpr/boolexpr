@@ -11,30 +11,32 @@ it :: Either ParseError (BoolExpr String)
 
 ## Matching example
 
-
+### Import and Functions declarations
 ```
+import Data.List (isInfixOf)
 matchingDoc :: Doc -> BoolExpr String -> Bool
 matchingDoc doc = evalBoolExpr (hasWord doc)
 
-import Data.List (isInfixOf)
-
-let Right query1 = runParser (parseBoolExpr identifier) () "" "Haskell"
-
-matchingString "I really like Haskell" query1
 ```
 
-True
+### Example query 1
+```
+let Right query1 = runParser (parseBoolExpr identifier) () "" "Haskell"
 
-`let Right query2 = runParser (parseBoolExpr identifier) () "" "Haskell NOT I"`
+matchingString "I really like Haskell" query1 == True
+```
 
-`matchingString "I really like Haskell" query2`
+### Example query 2
 
-False
+```
+let Right query2 = runParser (parseBoolExpr identifier) () "" "Haskell NOT I"
 
-`matchingString "You really like Haskell" query2`
-True
+matchingString "I really like Haskell" query2 == False
 
-Etc.
+matchingString "You really like Haskell" query2 == True
+```
+
+
 
 
 ## Boolean Tree manipulation
