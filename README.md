@@ -12,14 +12,16 @@ it :: Either ParseError (BoolExpr String)
 ## Matching example
 
 
+```
 matchingDoc :: Doc -> BoolExpr String -> Bool
 matchingDoc doc = evalBoolExpr (hasWord doc)
 
-`import Data.List (isInfixOf)`
+import Data.List (isInfixOf)
 
-`let Right query1 = runParser (parseBoolExpr identifier) () "" "Haskell"`
+let Right query1 = runParser (parseBoolExpr identifier) () "" "Haskell"
 
-`matchingString "I really like Haskell" query1`
+matchingString "I really like Haskell" query1
+```
 
 True
 
