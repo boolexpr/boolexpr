@@ -47,7 +47,7 @@ import Data.Foldable (Foldable(..))
 import Data.Traversable
 
 
--- | Signed values are either positive of negative.
+-- | Signed values are either positive or negative.
 data Signed a = Positive a | Negative a
   deriving (Eq, Ord, Show, Read)
 
@@ -67,6 +67,10 @@ class Boolean f where
   bTrue  :: f a
   bFalse :: f a
   bConst :: a -> f a
+
+bSignedConst :: Signed a -> BoolExpr a
+bSignedConst (Positive x) = BConst x
+bSignedConst (Negative x) = BNot (BConst x)
 
 -- | Syntax of boolean expressions parameterized over a
 -- set of leaves, named constants.
@@ -233,8 +237,8 @@ negateSigned :: Signed a -> Signed a
 negateSigned (Positive a) = Negative a
 negateSigned (Negative a) = Positive a
 
-negateConstant :: Signed a -> BoolExpr (Signed a)
-negateConstant = BConst . negateSigned
+negateConstant :: Signed a -> BoolExpr a
+negateConstant = bSignedConst . negateSigned
 
 
 -- | Print
