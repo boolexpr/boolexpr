@@ -13,7 +13,7 @@ stability:       Provisional
 build-type:      Simple
 
 library
-  build-depends:   base>=3.0&&<5, parsec
+  build-depends:   base>=3.0&&<5, parsec, extra
   exposed-modules: Data.BoolExpr
                    Data.BoolExpr.Parser
   ghc-options:     -Wall
