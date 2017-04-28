@@ -23,7 +23,7 @@ module Data.BoolExpr
   ,Signed(..)
   ,constants
   ,NegateConstant
-  -- ,negateString
+  ,negateConstant
    -- * Conjunctive Normal Form
   ,CNF(..),Conj(..)
   ,boolTreeToCNF
@@ -36,7 +36,6 @@ module Data.BoolExpr
   ,dualize
   ,fromBoolExpr
   ,pushNotInwards
-  ,negateString
   )
   where
 
@@ -230,7 +229,12 @@ boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
 --  TODO instances for NegateConstant
 
 -- negateString :: a -> BoolExpr a
-negateString = BConst . Negative
+negateSigned :: Signed a -> Signed a
+negateSigned (Positive a) = Negative a
+negateSigned (Negative a) = Positive a
+
+negateConstant :: Signed a -> BoolExpr (Signed a)
+negateConstant = BConst . negateSigned
 
 
 --test :: BoolExpr String -> BoolExpr String
