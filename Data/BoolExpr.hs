@@ -208,28 +208,27 @@ pushNotInwards _    BTrue       = BTrue
 pushNotInwards _    BFalse      = BFalse
 pushNotInwards _ b@(BConst _) = b
 
--- | Convert a boolean tree to a conjunctive normal form.
+
+-- | Conversion functions
+-- Convert a boolean tree to a conjunctive normal form.
 boolTreeToCNF :: NegateConstant a -> BoolExpr a -> CNF a
 boolTreeToCNF neg = fromBoolExpr . pushNotInwards neg
+
+-- | Convert a boolean tree to a disjunctive normal form.
+boolTreeToDNF :: NegateConstant a -> BoolExpr a -> DNF a
+boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
 
 -- | Reduce a boolean expression in conjunctive normal form to a single
 -- boolean.
 --reduceCNF :: CNF Bool -> Bool
 --reduceCNF = all (or . unDisj) . unConj . unCNF
 
--- | Convert a boolean tree to a disjunctive normal form.
-boolTreeToDNF :: (a -> BoolExpr a) -> BoolExpr a -> DNF a
-boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
-
 -- | Reduce a boolean expression in disjunctive normal form to a single
 -- boolean.
 --reduceDNF :: DNF Bool -> Bool
 --reduceDNF = any (and . unConj) . unDisj . unDNF
---
--- | Some usefull functions
---  TODO instances for NegateConstant
 
--- negateString :: a -> BoolExpr a
+-- | Some usefull functions
 negateSigned :: Signed a -> Signed a
 negateSigned (Positive a) = Negative a
 negateSigned (Negative a) = Positive a
@@ -237,9 +236,6 @@ negateSigned (Negative a) = Positive a
 negateConstant :: Signed a -> BoolExpr (Signed a)
 negateConstant = BConst . negateSigned
 
-
---test :: BoolExpr String -> BoolExpr String
---test neg = fromBoolExpr . pushNotInwards neg
 
 -- | Print
 printer :: (a -> ShowS) -> BoolExpr a -> ShowS
