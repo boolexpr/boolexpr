@@ -21,6 +21,7 @@ module Data.BoolExpr
   ,evalBoolExpr
    -- * Signed constants
   ,Signed(..)
+  ,negateSigned
   ,constants
   ,NegateConstant
   ,negateConstant
