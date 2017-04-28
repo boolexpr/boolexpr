@@ -68,10 +68,6 @@ class Boolean f where
   bFalse :: f a
   bConst :: a -> f a
 
-bSignedConst :: Signed a -> BoolExpr a
-bSignedConst (Positive x) = BConst x
-bSignedConst (Negative x) = BNot (BConst x)
-
 -- | Syntax of boolean expressions parameterized over a
 -- set of leaves, named constants.
 data BoolExpr a = BAnd (BoolExpr a) (BoolExpr a)
@@ -232,7 +228,11 @@ boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
 --reduceDNF :: DNF Bool -> Bool
 --reduceDNF = any (and . unConj) . unDisj . unDNF
 
--- | Some usefull functions
+-- | SignedConst
+bSignedConst :: Signed a -> BoolExpr a
+bSignedConst (Positive x) = BConst x
+bSignedConst (Negative x) = BNot (BConst x)
+
 negateSigned :: Signed a -> Signed a
 negateSigned (Positive a) = Negative a
 negateSigned (Negative a) = Positive a
