@@ -75,7 +75,7 @@ data BoolExpr a = BAnd (BoolExpr a) (BoolExpr a)
                 | BNot (BoolExpr a)
                 | BTrue
                 | BFalse
-                | BConst a
+                | BConst (Signed a)
   deriving (Eq, Ord, Show) {-! derive : Arbitrary !-}
 
 instance Functor BoolExpr where
@@ -84,7 +84,8 @@ instance Functor BoolExpr where
   fmap f (BNot t  ) = BNot (fmap f t)
   fmap _  BTrue     = BTrue
   fmap _  BFalse    = BFalse
-  fmap f (BConst x) = BConst (f x)
+  fmap f (BConst (Positive x)) = BConst (Positive (f x))
+  fmap f (BConst (Negative x)) = BConst (Negative (f x))
 
 instance Traversable BoolExpr where
   traverse f (BAnd a b) = BAnd <$> traverse f a <*> traverse f b
@@ -92,7 +93,8 @@ instance Traversable BoolExpr where
   traverse f (BNot t  ) = BNot <$> traverse f t
   traverse _  BTrue     = pure BTrue
   traverse _  BFalse    = pure BFalse
-  traverse f (BConst x) = BConst <$> f x
+  traverse f (BConst (Positive x)) = BConst <$> Positive <$> f x
+  traverse f (BConst (Negative x)) = BConst <$> Negative <$> f x
 
 instance Foldable BoolExpr where
   foldMap = foldMapDefault
@@ -103,10 +105,10 @@ instance Boolean BoolExpr where
   bNot   = BNot
   bTrue  = BTrue
   bFalse = BFalse
-  bConst = BConst
+  bConst = bSignedConst . Positive
 
 -- | Turns a boolean tree into any boolean type.
-fromBoolExpr :: Boolean f => BoolExpr a -> f a
+fromBoolExpr :: Boolean f => BoolExpr a -> f (Signed a)
 fromBoolExpr (BAnd l r) = fromBoolExpr l /\ fromBoolExpr r
 fromBoolExpr (BOr  l r) = fromBoolExpr l \/ fromBoolExpr r
 fromBoolExpr (BNot t  ) = bNot $ fromBoolExpr t
@@ -162,7 +164,8 @@ reduceBoolExpr (BOr  a b) = reduceBoolExpr a || reduceBoolExpr b
 reduceBoolExpr (BNot a)   = not $ reduceBoolExpr a
 reduceBoolExpr  BTrue     = True
 reduceBoolExpr  BFalse    = False
-reduceBoolExpr (BConst c) = c
+reduceBoolExpr (BConst (Positive c)) = c
+reduceBoolExpr (BConst (Negative c)) = not c
 
 -- Given a evaluation function of constants, returns an evaluation
 -- function over boolean trees.
@@ -179,7 +182,7 @@ evalBoolExpr f = reduceBoolExpr . fmap (f$)
 -- | Returns constants used in a given boolean tree, these
 -- constants are returned signed depending one how many
 -- negations stands over a given constant.
-constants :: BoolExpr a -> [Signed a]
+constants :: BoolExpr a -> [Signed (Signed a)]
 constants = go True
   where go sign (BAnd a b) = go sign a ++ go sign b
         go sign (BOr  a b) = go sign a ++ go sign b
@@ -187,6 +190,7 @@ constants = go True
         go _     BTrue     = []
         go _     BFalse    = []
         go sign (BConst x) = [if sign then Positive x else Negative x]
+
 
 dualize :: NegateConstant a -> BoolExpr a -> BoolExpr a
 dualize neg (BAnd l r) = BOr  (dualize neg l) (dualize neg r)
@@ -196,10 +200,10 @@ dualize _    BFalse    = BTrue
 dualize neg (BConst c) = neg c
 dualize _   (BNot _)   = error "dualize: impossible"
 
-type NegateConstant a = a -> BoolExpr a
 
 -- | Push the negations inwards as much as possible.
 -- The resulting boolean tree no longer use negations.
+
 pushNotInwards :: NegateConstant a -> BoolExpr a -> BoolExpr a
 pushNotInwards neg (BAnd l r)   = BAnd (pushNotInwards neg l) (pushNotInwards neg r)
 pushNotInwards neg (BOr  l r)   = BOr  (pushNotInwards neg l) (pushNotInwards neg r)
@@ -211,11 +215,11 @@ pushNotInwards _ b@(BConst _) = b
 
 -- | Conversion functions
 -- Convert a boolean tree to a conjunctive normal form.
-boolTreeToCNF :: NegateConstant a -> BoolExpr a -> CNF a
+boolTreeToCNF :: NegateConstant a -> BoolExpr a -> CNF (Signed a)
 boolTreeToCNF neg = fromBoolExpr . pushNotInwards neg
 
 -- | Convert a boolean tree to a disjunctive normal form.
-boolTreeToDNF :: NegateConstant a -> BoolExpr a -> DNF a
+boolTreeToDNF :: NegateConstant a -> BoolExpr a -> DNF (Signed a)
 boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
 
 -- | Reduce a boolean expression in conjunctive normal form to a single
@@ -228,14 +232,16 @@ boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
 --reduceDNF :: DNF Bool -> Bool
 --reduceDNF = any (and . unConj) . unDisj . unDNF
 
+type NegateConstant a = Signed a -> BoolExpr a
+
 -- | SignedConst
 bSignedConst :: Signed a -> BoolExpr a
-bSignedConst (Positive x) = BConst x
-bSignedConst (Negative x) = BNot (BConst x)
+bSignedConst (Positive x) = BConst (Positive x)
+bSignedConst (Negative x) = BNot (BConst (Positive x))
 
 negateSigned :: Signed a -> Signed a
-negateSigned (Positive a) = Negative a
-negateSigned (Negative a) = Positive a
+negateSigned (Positive x) = Negative x
+negateSigned (Negative x) = Positive x
 
 negateConstant :: Signed a -> BoolExpr a
 negateConstant = bSignedConst . negateSigned

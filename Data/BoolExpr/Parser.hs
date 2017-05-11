@@ -34,13 +34,13 @@ parseBoolExpr :: CharParser st a -> CharParser st (BoolExpr a)
 parseBoolExpr parseConst = disj
    where disj   = conj   `chainl1` orOp
          conj   = factor `chainl1` andOp
-         factor =     (  (symbol "-" >> return BNot  )
+         factor =     (  (symbol "-"   >> return BNot)
                      <|> (symbol "NOT" >> return BNot)
                      <|> (return id                  )
                       ) 
                       `ap` 
                          (  parens disj 
-                        <|> BConst `fmap` parseConst
+                        <|> BConst `fmap` (Positive `fmap` parseConst)
                          )
 
          andOp = BAnd <$ option "" (symbol "AND")
