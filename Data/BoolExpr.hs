@@ -84,8 +84,7 @@ instance Functor BoolExpr where
   fmap f (BNot t  ) = BNot (fmap f t)
   fmap _  BTrue     = BTrue
   fmap _  BFalse    = BFalse
-  fmap f (BConst (Positive x)) = BConst (Positive (f x))
-  fmap f (BConst (Negative x)) = BConst (Negative (f x))
+  fmap f (BConst x) = BConst (fmap f x)
 
 instance Traversable BoolExpr where
   traverse f (BAnd a b) = BAnd <$> traverse f a <*> traverse f b
