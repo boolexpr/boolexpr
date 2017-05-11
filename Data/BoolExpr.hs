@@ -55,6 +55,13 @@ instance Functor Signed where
   fmap f (Positive x) = Positive (f x)
   fmap f (Negative x) = Negative (f x)
 
+instance Traversable Signed where
+  traverse f (Positive x) = Positive <$> f x
+  traverse f (Negative x) = Negative <$> f x
+
+instance Foldable Signed where
+  foldMap = foldMapDefault
+
 
 infix /\
 infix \/
@@ -92,8 +99,7 @@ instance Traversable BoolExpr where
   traverse f (BNot t  ) = BNot <$> traverse f t
   traverse _  BTrue     = pure BTrue
   traverse _  BFalse    = pure BFalse
-  traverse f (BConst (Positive x)) = BConst <$> Positive <$> f x
-  traverse f (BConst (Negative x)) = BConst <$> Negative <$> f x
+  traverse f (BConst x) = BConst <$> traverse f x
 
 instance Foldable BoolExpr where
   foldMap = foldMapDefault
