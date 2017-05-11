@@ -238,7 +238,6 @@ type NegateConstant a = Signed a -> BoolExpr a
 -- | SignedConst
 bSignedConst :: Signed a -> BoolExpr a
 bSignedConst x = BConst x
-bSignedConst x = BNot (BConst x)
 
 negateSigned :: Signed a -> Signed a
 negateSigned (Positive x) = Negative x
