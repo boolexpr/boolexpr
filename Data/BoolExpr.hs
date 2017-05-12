@@ -48,6 +48,7 @@ module Data.BoolExpr
 
 -- import Test.QuickCheck hiding (Positive)
 -- import Control.Applicative
+import Control.Monad (ap)
 import Data.Monoid (Monoid(..))
 import Data.Foldable (Foldable(..))
 import Data.Traversable
@@ -68,6 +69,14 @@ instance Traversable Signed where
 instance Foldable Signed where
   foldMap = foldMapDefault
 
+instance Applicative Signed where
+  pure  = Positive
+  (<*>) = ap
+
+instance Monad Signed where
+  return = Positive
+  Positive x >>= f = f x
+  Negative x >>= f = negateSigned $ f x
 
 infix /\
 infix \/
