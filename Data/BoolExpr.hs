@@ -73,7 +73,7 @@ class Boolean f where
   bNot   :: f a -> f a
   bTrue  :: f a
   bFalse :: f a
-  bConst :: a -> f a
+  bConst :: Signed a -> f a
 
 -- | Syntax of boolean expressions parameterized over a
 -- set of leaves, named constants.
@@ -110,10 +110,10 @@ instance Boolean BoolExpr where
   bNot   = BNot
   bTrue  = BTrue
   bFalse = BFalse
-  bConst = bSignedConst . Positive
+  bConst = BConst
 
 -- | Turns a boolean tree into any boolean type.
-fromBoolExpr :: Boolean f => BoolExpr a -> f (Signed a)
+fromBoolExpr :: Boolean f => BoolExpr a -> f a
 fromBoolExpr (BAnd l r) = fromBoolExpr l /\ fromBoolExpr r
 fromBoolExpr (BOr  l r) = fromBoolExpr l \/ fromBoolExpr r
 fromBoolExpr (BNot t  ) = bNot $ fromBoolExpr t
@@ -147,7 +147,7 @@ instance Boolean CNF where
   bNot     = error "bNot on CNF"
   bTrue    = CNF $ Conj[]
   bFalse   = CNF $ Conj[Disj[]]
-  bConst x = CNF $ Conj[Disj[Positive x]]
+  bConst x = CNF $ Conj[Disj[x]]
 
 
 instance Functor DNF where
@@ -160,7 +160,7 @@ instance Boolean DNF where
   bNot     = error "bNot on CNF"
   bTrue    = DNF $ Disj[Conj[]]
   bFalse   = DNF $ Disj[]
-  bConst x = DNF $ Disj[Conj[Positive x]]
+  bConst x = DNF $ Disj[Conj[x]]
 
 -- | Reduce a boolean tree annotated by booleans to a single boolean.
 reduceBoolExpr :: BoolExpr Bool -> Bool
@@ -220,11 +220,11 @@ pushNotInwards _ b@(BConst _) = b
 
 -- | Conversion functions
 -- Convert a boolean tree to a conjunctive normal form.
-boolTreeToCNF :: NegateConstant a -> BoolExpr a -> CNF (Signed a)
+boolTreeToCNF :: NegateConstant a -> BoolExpr a -> CNF a
 boolTreeToCNF neg = fromBoolExpr . pushNotInwards neg
 
 -- | Convert a boolean tree to a disjunctive normal form.
-boolTreeToDNF :: NegateConstant a -> BoolExpr a -> DNF (Signed a)
+boolTreeToDNF :: NegateConstant a -> BoolExpr a -> DNF a
 boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
 
 -- | Reduce a boolean expression in conjunctive normal form to a single
@@ -239,17 +239,12 @@ boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
 
 type NegateConstant a = Signed a -> BoolExpr a
 
-
--- | SignedConst
-bSignedConst :: Signed a -> BoolExpr a
-bSignedConst x = BConst x
-
 negateSigned :: Signed a -> Signed a
 negateSigned (Positive x) = Negative x
 negateSigned (Negative x) = Positive x
 
-negateConstant :: Signed a -> BoolExpr a
-negateConstant = bSignedConst . negateSigned
+negateConstant :: Boolean f => Signed a -> f a
+negateConstant = bConst . negateSigned
 
 
 -- | Print
