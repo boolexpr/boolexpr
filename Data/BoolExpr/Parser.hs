@@ -25,6 +25,7 @@ import qualified Text.ParserCombinators.Parsec.Token as P
         | bt bt -- same as AND
         | bt OR bt
         | - bt
+        | NOT bt
         | ( bt )
         | const
    const ::= \<given as argument\>
