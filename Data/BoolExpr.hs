@@ -22,6 +22,8 @@ module Data.BoolExpr
    -- * Signed constants
   ,Signed(..)
   ,negateSigned
+  ,evalSigned
+  ,reduceSigned
   ,constants
   ,negateConstant
    -- * Conjunctive Normal Form
@@ -236,6 +238,12 @@ boolTreeToDNF = fromBoolExpr . pushNotInwards
 --reduceDNF :: DNF Bool -> Bool
 --reduceDNF = any (and . unConj) . unDisj . unDNF
 
+evalSigned :: (a -> Bool) -> Signed a -> Bool
+evalSigned f (Positive x) = f x
+evalSigned f (Negative x) = not $ f x
+
+reduceSigned :: Signed Bool -> Bool
+reduceSigned = evalSigned id
 
 negateSigned :: Signed a -> Signed a
 negateSigned (Positive x) = Negative x
