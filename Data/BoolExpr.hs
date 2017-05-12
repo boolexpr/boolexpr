@@ -145,6 +145,26 @@ instance Boolean BoolExpr where
   bFalse = BFalse
   bConst = BConst
 
+newtype Eval b a = Eval { runEval :: (a -> b) -> b }
+
+runEvalId :: Eval a a -> a
+runEvalId e = runEval e id
+
+instance b ~ Bool => Boolean (Eval b) where
+  ( /\ ) = liftE2 (&&)
+  ( \/ ) = liftE2 (||)
+  bNot   = liftE  not
+  bTrue  = Eval $ const True
+  bFalse = Eval $ const False
+  bConst = Eval . flip evalSigned
+
+liftE :: (b -> b) -> Eval b a -> Eval b a
+liftE f (Eval x) = Eval (f . x)
+
+liftE2 :: (b -> b -> b) -> Eval b a -> Eval b a -> Eval b a
+liftE2 f (Eval x) (Eval y) = Eval (\e -> f (x e) (y e))
+
+
 -- | Turns a boolean tree into any boolean type.
 fromBoolExpr :: Boolean f => BoolExpr a -> f a
 fromBoolExpr (BAnd l r) = fromBoolExpr l /\ fromBoolExpr r
@@ -197,13 +217,7 @@ instance Boolean DNF where
 
 -- | Reduce a boolean tree annotated by booleans to a single boolean.
 reduceBoolExpr :: BoolExpr Bool -> Bool
-reduceBoolExpr (BAnd a b) = reduceBoolExpr a && reduceBoolExpr b
-reduceBoolExpr (BOr  a b) = reduceBoolExpr a || reduceBoolExpr b
-reduceBoolExpr (BNot a)   = not $ reduceBoolExpr a
-reduceBoolExpr  BTrue     = True
-reduceBoolExpr  BFalse    = False
-reduceBoolExpr (BConst (Positive c)) = c
-reduceBoolExpr (BConst (Negative c)) = not c
+reduceBoolExpr = evalBoolExpr id
 
 -- Given a evaluation function of constants, returns an evaluation
 -- function over boolean trees.
@@ -215,7 +229,7 @@ reduceBoolExpr (BConst (Negative c)) = not c
 -- evalBoolExpr f = reduceBoolExpr . fmap (f$)
 -- @
 evalBoolExpr :: (a -> Bool) -> (BoolExpr a -> Bool)
-evalBoolExpr f = reduceBoolExpr . fmap (f$)
+evalBoolExpr env expr = runEval (fromBoolExpr expr) env
 
 -- | Returns constants used in a given boolean tree, these
 -- constants are returned signed depending one how many
@@ -276,12 +290,12 @@ boolTreeToDNF = pushNotInwards
 -- | Reduce a boolean expression in conjunctive normal form to a single
 -- boolean.
 reduceCNF :: CNF Bool -> Bool
-reduceCNF = all (any reduceSigned . unDisj) . unConj . unCNF
+reduceCNF = runEvalId . fromCNF
 
 -- | Reduce a boolean expression in disjunctive normal form to a single
 -- boolean.
 reduceDNF :: DNF Bool -> Bool
-reduceDNF = any (all reduceSigned . unConj) . unDisj . unDNF
+reduceDNF = runEvalId . fromDNF
 
 evalSigned :: (a -> Bool) -> Signed a -> Bool
 evalSigned f (Positive x) = f x
