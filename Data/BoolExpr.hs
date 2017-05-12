@@ -252,11 +252,6 @@ negateSigned (Negative x) = Positive x
 negateConstant :: Boolean f => Signed a -> f a
 negateConstant = bConst . negateSigned
 
-
--- | Print
-printer :: (a -> ShowS) -> BoolExpr a -> ShowS
-printer = undefined
-
 {-
 prop_reduceBoolExpr_EQ_reduceCNF t = reduceBoolExpr t == reduceCNF (boolTreeToCNF t)
 

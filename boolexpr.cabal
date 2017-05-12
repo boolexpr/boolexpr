@@ -14,8 +14,9 @@ build-type:      Simple
 
 library
   build-depends:   base>=3.0&&<5, parsec, extra
-  exposed-modules: Data.BoolExpr
-                   Data.BoolExpr.Parser
+  exposed-modules: Data.BoolExpr,
+                   Data.BoolExpr.Parser,
+                   Data.BoolExpr.Printer
   ghc-options:     -Wall
 
 source-repository head
