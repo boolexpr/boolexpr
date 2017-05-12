@@ -33,10 +33,12 @@ module Data.BoolExpr
   ,negateConstant
    -- * Conjunctive Normal Form
   ,CNF(..),Conj(..)
+  ,fromCNF
   ,boolTreeToCNF
   ,reduceCNF
    -- * Disjunctive Normal Form
   ,Disj(..),DNF(..)
+  ,fromDNF
   ,boolTreeToDNF
   ,reduceDNF
    -- * Other transformations
