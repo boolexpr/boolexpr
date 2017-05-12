@@ -64,10 +64,10 @@ whiteSpace :: CharParser st ()
 whiteSpace = P.whiteSpace lexer
 
 -- | Shorthand for 'P.identifier' 'lexer'.
-identifier :: CharParser st (Signed String)
+identifier :: CharParser st String
 identifier = do
     str <- P.identifier lexer
-    pure $ Positive str
+    pure str
 
 wordLetter :: CharParser st Char
 wordLetter = alphaNum <|> oneOf "_:;`,~@.!#$%^&*=+?|\\{}[]<>"
