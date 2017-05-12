@@ -23,7 +23,6 @@ module Data.BoolExpr
   ,Signed(..)
   ,negateSigned
   ,constants
-  ,NegateConstant
   ,negateConstant
    -- * Conjunctive Normal Form
   ,CNF(..),Conj(..)
@@ -197,35 +196,35 @@ constants = go True
         go sign (BConst x) = [if sign then Positive x else Negative x]
 
 
-dualize :: NegateConstant a -> BoolExpr a -> BoolExpr a
-dualize neg (BAnd l r) = BOr  (dualize neg l) (dualize neg r)
-dualize neg (BOr  l r) = BAnd (dualize neg l) (dualize neg r)
-dualize _    BTrue     = BFalse
-dualize _    BFalse    = BTrue
-dualize neg (BConst c) = neg c
-dualize _   (BNot _)   = error "dualize: impossible"
+dualize :: BoolExpr a -> BoolExpr a
+dualize (BAnd l r) = BOr  (dualize l) (dualize r)
+dualize (BOr  l r) = BAnd (dualize l) (dualize r)
+dualize  BTrue     = BFalse
+dualize  BFalse    = BTrue
+dualize (BConst c) = negateConstant c
+dualize (BNot _)   = error "dualize: impossible"
 
 
 -- | Push the negations inwards as much as possible.
 -- The resulting boolean tree no longer use negations.
 
-pushNotInwards :: NegateConstant a -> BoolExpr a -> BoolExpr a
-pushNotInwards neg (BAnd l r)   = BAnd (pushNotInwards neg l) (pushNotInwards neg r)
-pushNotInwards neg (BOr  l r)   = BOr  (pushNotInwards neg l) (pushNotInwards neg r)
-pushNotInwards neg (BNot t  )   = dualize neg $ pushNotInwards neg t
-pushNotInwards _    BTrue       = BTrue
-pushNotInwards _    BFalse      = BFalse
-pushNotInwards _ b@(BConst _) = b
+pushNotInwards :: BoolExpr a -> BoolExpr a
+pushNotInwards (BAnd l r)   = BAnd (pushNotInwards l) (pushNotInwards r)
+pushNotInwards (BOr  l r)   = BOr  (pushNotInwards l) (pushNotInwards r)
+pushNotInwards (BNot t  )   = dualize $ pushNotInwards t
+pushNotInwards  BTrue       = BTrue
+pushNotInwards  BFalse      = BFalse
+pushNotInwards b@(BConst _) = b
 
 
 -- | Conversion functions
 -- Convert a boolean tree to a conjunctive normal form.
-boolTreeToCNF :: NegateConstant a -> BoolExpr a -> CNF a
-boolTreeToCNF neg = fromBoolExpr . pushNotInwards neg
+boolTreeToCNF :: BoolExpr a -> CNF a
+boolTreeToCNF = fromBoolExpr . pushNotInwards
 
 -- | Convert a boolean tree to a disjunctive normal form.
-boolTreeToDNF :: NegateConstant a -> BoolExpr a -> DNF a
-boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
+boolTreeToDNF :: BoolExpr a -> DNF a
+boolTreeToDNF = fromBoolExpr . pushNotInwards
 
 -- | Reduce a boolean expression in conjunctive normal form to a single
 -- boolean.
@@ -237,7 +236,6 @@ boolTreeToDNF neg = fromBoolExpr . pushNotInwards neg
 --reduceDNF :: DNF Bool -> Bool
 --reduceDNF = any (and . unConj) . unDisj . unDNF
 
-type NegateConstant a = Signed a -> BoolExpr a
 
 negateSigned :: Signed a -> Signed a
 negateSigned (Positive x) = Negative x
@@ -252,11 +250,11 @@ printer :: (a -> ShowS) -> BoolExpr a -> ShowS
 printer = undefined
 
 {-
-prop_reduceBoolExpr_EQ_reduceCNF neg t = reduceBoolExpr t == reduceCNF (boolTreeToCNF neg t)
+prop_reduceBoolExpr_EQ_reduceCNF t = reduceBoolExpr t == reduceCNF (boolTreeToCNF t)
 
 prop_reduceBoolExpr_EQ_reduceCNF_Bool = prop_reduceBoolExpr_EQ_reduceCNF (BConst . not)
 
-prop_reduceBoolExpr_EQ_reduceDNF neg t = reduceBoolExpr t == reduceDNF (boolTreeToDNF neg t)
+prop_reduceBoolExpr_EQ_reduceDNF t = reduceBoolExpr t == reduceDNF (boolTreeToDNF t)
 
 prop_reduceBoolExpr_EQ_reduceDNF_Bool = prop_reduceBoolExpr_EQ_reduceDNF (BConst . not)
 
