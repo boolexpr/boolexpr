@@ -15,6 +15,11 @@
 module Data.BoolExpr
   (-- * A boolean class
    Boolean(..)
+   -- * Generic functions derived from Boolean
+  ,bAnd
+  ,bAll
+  ,bOr
+  ,bAny
    -- * Boolean trees
   ,BoolExpr(..)
   ,reduceBoolExpr
@@ -75,6 +80,22 @@ class Boolean f where
   bTrue  :: f a
   bFalse :: f a
   bConst :: Signed a -> f a
+
+-- | Generalized 'Data.Foldable.and'.
+bAnd :: (Foldable t, Boolean f) => t (f b) -> f b
+bAnd = foldr (/\) bTrue
+
+-- | Generalized 'Data.Foldable.all'.
+bAll :: (Foldable t, Boolean f) => (a -> f b) -> t a -> f b
+bAll f = foldr (\x y -> f x /\ y) bTrue
+
+-- | Generalized 'Data.Foldable.or'.
+bOr :: (Foldable t, Boolean f) => t (f b) -> f b
+bOr = foldr (\/) bFalse
+
+-- | Generalized 'Data.Foldable.any'.
+bAny :: (Foldable t, Boolean f) => (a -> f b) -> t a -> f b
+bAny f = foldr (\x y -> f x \/ y) bFalse
 
 -- | Syntax of boolean expressions parameterized over a
 -- set of leaves, named constants.
