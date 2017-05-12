@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, TypeFamilies #-}
 --------------------------------------------------------------------
 -- |
 -- Module    : Data.BoolExpr
@@ -24,6 +24,9 @@ module Data.BoolExpr
   ,BoolExpr(..)
   ,reduceBoolExpr
   ,evalBoolExpr
+   -- * Boolean evaluation semantic
+  ,Eval(..)
+  ,runEvalId
    -- * Signed constants
   ,Signed(..)
   ,negateSigned
