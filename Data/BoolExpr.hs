@@ -209,14 +209,14 @@ evalBoolExpr f = reduceBoolExpr . fmap (f$)
 -- | Returns constants used in a given boolean tree, these
 -- constants are returned signed depending one how many
 -- negations stands over a given constant.
-constants :: BoolExpr a -> [Signed (Signed a)]
+constants :: BoolExpr a -> [Signed a]
 constants = go True
   where go sign (BAnd a b) = go sign a ++ go sign b
         go sign (BOr  a b) = go sign a ++ go sign b
         go sign (BNot t)   = go (not sign) t
         go _     BTrue     = []
         go _     BFalse    = []
-        go sign (BConst x) = [if sign then Positive x else Negative x]
+        go sign (BConst x) = [if sign then x else negateSigned x]
 
 
 dualize :: BoolExpr a -> BoolExpr a
