@@ -29,11 +29,11 @@ module Data.BoolExpr
    -- * Conjunctive Normal Form
   ,CNF(..),Conj(..)
   ,boolTreeToCNF
-  -- ,reduceCNF
+  ,reduceCNF
    -- * Disjunctive Normal Form
   ,Disj(..),DNF(..)
   ,boolTreeToDNF
-  -- ,reduceDNF
+  ,reduceDNF
    -- * Other transformations
   ,dualize
   ,fromBoolExpr
@@ -230,13 +230,13 @@ boolTreeToDNF = fromBoolExpr . pushNotInwards
 
 -- | Reduce a boolean expression in conjunctive normal form to a single
 -- boolean.
---reduceCNF :: CNF Bool -> Bool
---reduceCNF = all (or . unDisj) . unConj . unCNF
+reduceCNF :: CNF Bool -> Bool
+reduceCNF = all (any reduceSigned . unDisj) . unConj . unCNF
 
 -- | Reduce a boolean expression in disjunctive normal form to a single
 -- boolean.
---reduceDNF :: DNF Bool -> Bool
---reduceDNF = any (and . unConj) . unDisj . unDNF
+reduceDNF :: DNF Bool -> Bool
+reduceDNF = any (all reduceSigned . unConj) . unDisj . unDNF
 
 evalSigned :: (a -> Bool) -> Signed a -> Bool
 evalSigned f (Positive x) = f x
