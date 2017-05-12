@@ -230,25 +230,30 @@ constants = go True
         go sign (BConst x) = [if sign then x else negateSigned x]
 
 
-dualize :: BoolExpr a -> BoolExpr a
-dualize (BAnd l r) = BOr  (dualize l) (dualize r)
-dualize (BOr  l r) = BAnd (dualize l) (dualize r)
-dualize  BTrue     = BFalse
-dualize  BFalse    = BTrue
+dualize :: Boolean f => BoolExpr a -> f a
+dualize (BAnd l r) = dualize l \/ dualize r
+dualize (BOr  l r) = dualize l /\ dualize r
+dualize  BTrue     = bFalse
+dualize  BFalse    = bTrue
 dualize (BConst c) = negateConstant c
-dualize (BNot _)   = error "dualize: impossible"
+dualize (BNot e)   = fromBoolExpr e
+-- When dualize is used by pushNotInwards not BNot remain,
+-- hence it makes sense to assert that dualize does not
+-- have to work on BNot. However `dualize` can be freely
+-- used as a fancy `bNot`.
+-- dualize (BNot _)   = error "dualize: impossible"
 
 
 -- | Push the negations inwards as much as possible.
 -- The resulting boolean tree no longer use negations.
 
-pushNotInwards :: BoolExpr a -> BoolExpr a
-pushNotInwards (BAnd l r)   = BAnd (pushNotInwards l) (pushNotInwards r)
-pushNotInwards (BOr  l r)   = BOr  (pushNotInwards l) (pushNotInwards r)
+pushNotInwards :: Boolean f => BoolExpr a -> f a
+pushNotInwards (BAnd l r)   = pushNotInwards l /\ pushNotInwards r
+pushNotInwards (BOr  l r)   = pushNotInwards l \/ pushNotInwards r
 pushNotInwards (BNot t  )   = dualize $ pushNotInwards t
-pushNotInwards  BTrue       = BTrue
-pushNotInwards  BFalse      = BFalse
-pushNotInwards b@(BConst _) = b
+pushNotInwards  BTrue       = bTrue
+pushNotInwards  BFalse      = bFalse
+pushNotInwards (BConst c)   = bConst c
 
 -- | Convert a 'CNF' (a boolean expression in conjunctive normal form)
 -- to any other form supported by 'Boolean'.
