@@ -265,14 +265,13 @@ fromCNF = bAll (bAny bConst . unDisj) . unConj . unCNF
 fromDNF :: Boolean f => DNF a -> f a
 fromDNF = bAny (bAll bConst . unConj) . unDisj . unDNF
 
--- | Conversion functions
--- Convert a boolean tree to a conjunctive normal form.
+-- | Convert a boolean tree to a conjunctive normal form.
 boolTreeToCNF :: BoolExpr a -> CNF a
-boolTreeToCNF = fromBoolExpr . pushNotInwards
+boolTreeToCNF = pushNotInwards
 
 -- | Convert a boolean tree to a disjunctive normal form.
 boolTreeToDNF :: BoolExpr a -> DNF a
-boolTreeToDNF = fromBoolExpr . pushNotInwards
+boolTreeToDNF = pushNotInwards
 
 -- | Reduce a boolean expression in conjunctive normal form to a single
 -- boolean.
