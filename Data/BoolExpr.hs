@@ -239,6 +239,15 @@ pushNotInwards  BTrue       = BTrue
 pushNotInwards  BFalse      = BFalse
 pushNotInwards b@(BConst _) = b
 
+-- | Convert a 'CNF' (a boolean expression in conjunctive normal form)
+-- to any other form supported by 'Boolean'.
+fromCNF :: Boolean f => CNF a -> f a
+fromCNF = bAll (bAny bConst . unDisj) . unConj . unCNF
+
+-- | Convert a 'DNF' (a boolean expression in disjunctive normal form)
+-- to any other form supported by 'Boolean'.
+fromDNF :: Boolean f => DNF a -> f a
+fromDNF = bAny (bAll bConst . unConj) . unDisj . unDNF
 
 -- | Conversion functions
 -- Convert a boolean tree to a conjunctive normal form.
