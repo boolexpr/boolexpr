@@ -54,8 +54,6 @@ module Data.BoolExpr
 -- import Test.QuickCheck hiding (Positive)
 -- import Control.Applicative
 import Control.Monad (ap)
-import Data.Monoid (Monoid(..))
-import Data.Foldable (Foldable(..))
 import Data.Traversable
 
 
@@ -179,19 +177,19 @@ fromBoolExpr (BConst c) = bConst c
 
 --- | Disjunction of atoms ('a')
 newtype Disj a = Disj { unDisj :: [a] }
-  deriving (Show, Functor, Monoid)
+  deriving (Show, Functor, Semigroup, Monoid)
 
 --- | Conjunction of atoms ('a')
 newtype Conj a = Conj { unConj :: [a] }
-  deriving (Show, Functor, Monoid)
+  deriving (Show, Functor, Semigroup, Monoid)
 
 --- | Conjunctive Normal Form
 newtype CNF a = CNF { unCNF :: Conj (Disj (Signed a)) }
-  deriving (Show, Monoid)
+  deriving (Show, Semigroup, Monoid)
 
 --- | Disjunctive Normal Form
 newtype DNF a = DNF { unDNF :: Disj (Conj (Signed a)) }
-  deriving (Show, Monoid)
+  deriving (Show, Semigroup, Monoid)
 
 instance Functor CNF where
   fmap f (CNF x) = CNF (fmap (fmap (fmap f)) x)
