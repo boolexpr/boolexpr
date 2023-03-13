@@ -77,7 +77,6 @@ instance Applicative Signed where
   (<*>) = ap
 
 instance Monad Signed where
-  return = Positive
   Positive x >>= f = f x
   Negative x >>= f = negateSigned $ f x
 
