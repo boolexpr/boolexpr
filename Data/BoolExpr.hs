@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, TypeFamilies, RankNTypes, ScopedTypeVariables #-}
+{-# LANGUAGE DeriveTraversable, GeneralizedNewtypeDeriving, TypeFamilies, RankNTypes, ScopedTypeVariables #-}
 
 --------------------------------------------------------------------
 -- |
@@ -53,10 +53,7 @@ module Data.BoolExpr
   )
   where
 
--- import Test.QuickCheck hiding (Positive)
--- import Control.Applicative
 import Control.Monad (ap)
-import Data.Traversable
 import Data.Functor.Const (Const(..))
 
 -- | Signed values are either positive or negative.
@@ -107,26 +104,7 @@ data BoolExpr a = BAnd (BoolExpr a) (BoolExpr a)
                 | BTrue
                 | BFalse
                 | BConst (Signed a)
-  deriving (Eq, Ord, Show) {-! derive : Arbitrary !-}
-
-instance Functor BoolExpr where
-  fmap f (BAnd a b) = BAnd (fmap f a) (fmap f b)
-  fmap f (BOr  a b) = BOr  (fmap f a) (fmap f b)
-  fmap f (BNot t  ) = BNot (fmap f t)
-  fmap _  BTrue     = BTrue
-  fmap _  BFalse    = BFalse
-  fmap f (BConst x) = BConst (fmap f x)
-
-instance Traversable BoolExpr where
-  traverse f (BAnd a b) = BAnd <$> traverse f a <*> traverse f b
-  traverse f (BOr  a b) = BOr  <$> traverse f a <*> traverse f b
-  traverse f (BNot t  ) = BNot <$> traverse f t
-  traverse _  BTrue     = pure BTrue
-  traverse _  BFalse    = pure BFalse
-  traverse f (BConst x) = BConst <$> traverse f x
-
-instance Foldable BoolExpr where
-  foldMap = foldMapDefault
+  deriving (Eq, Ord, Show, Functor, Traversable, Foldable) {-! derive : Arbitrary !-}
 
 instance Boolean BoolExpr where
   ( /\ ) = BAnd
