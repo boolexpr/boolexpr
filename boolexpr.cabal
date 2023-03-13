@@ -1,5 +1,5 @@
 name:            boolexpr
-cabal-Version:   >=1.6
+cabal-Version:   >=1.10
 version:         0.2
 license:         BSD3
 license-File:    LICENSE
@@ -18,7 +18,8 @@ library
                    Data.BoolExpr.Parser,
                    Data.BoolExpr.Printer
   ghc-options:     -Wall
+  default-language: Haskell98
 
 source-repository head
   type:     git
-  location: https://github.com/np/boolexpr.git
+  location: https://github.com/boolexpr/boolexpr.git
