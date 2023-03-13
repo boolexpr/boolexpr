@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, TypeFamilies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, TypeFamilies, RankNTypes, ScopedTypeVariables #-}
 --------------------------------------------------------------------
 -- |
 -- Module    : Data.BoolExpr
@@ -32,6 +32,7 @@ module Data.BoolExpr
   ,negateSigned
   ,evalSigned
   ,reduceSigned
+  ,foldConstants
   ,constants
   ,negateConstant
    -- * Conjunctive Normal Form
@@ -55,6 +56,7 @@ module Data.BoolExpr
 -- import Control.Applicative
 import Control.Monad (ap)
 import Data.Traversable
+import Data.Functor.Const (Const(..))
 
 
 -- | Signed values are either positive or negative.
@@ -233,15 +235,26 @@ evalBoolExpr env expr = runEval (fromBoolExpr expr) env
 
 -- | Returns constants used in a given boolean tree, these
 -- constants are returned signed depending one how many
--- negations stands over a given constant.
+-- negations stand over them.
 constants :: BoolExpr a -> [Signed a]
-constants = go True
-  where go sign (BAnd a b) = go sign a ++ go sign b
-        go sign (BOr  a b) = go sign a ++ go sign b
+constants = getConst . foldConstants (Const . (: []))
+
+type Getting r s a = (a -> Const r a) -> s -> Const r s
+
+type Fold s a = forall m. Monoid m => Getting m s a
+
+-- | Fold over constants used in a given boolean tree, these
+-- constants are signed depending one how many
+-- negations stand over them.
+-- This fold is compatible with lenses.
+foldConstants :: forall a. Fold (BoolExpr a) (Signed a)
+foldConstants f = go True
+  where go sign (BAnd a b) = go sign a <> go sign b
+        go sign (BOr  a b) = go sign a <> go sign b
         go sign (BNot t)   = go (not sign) t
-        go _     BTrue     = []
-        go _     BFalse    = []
-        go sign (BConst x) = [if sign then x else negateSigned x]
+        go _     BTrue     = mempty
+        go _     BFalse    = mempty
+        go sign (BConst x) = BConst <$> f (if sign then x else negateSigned x)
 
 
 dualize :: Boolean f => BoolExpr a -> f a
