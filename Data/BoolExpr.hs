@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, TypeFamilies, RankNTypes, ScopedTypeVariables #-}
+
 --------------------------------------------------------------------
 -- |
 -- Module    : Data.BoolExpr
@@ -58,21 +59,9 @@ import Control.Monad (ap)
 import Data.Traversable
 import Data.Functor.Const (Const(..))
 
-
 -- | Signed values are either positive or negative.
 data Signed a = Positive a | Negative a
-  deriving (Eq, Ord, Show, Read)
-
-instance Functor Signed where
-  fmap f (Positive x) = Positive (f x)
-  fmap f (Negative x) = Negative (f x)
-
-instance Traversable Signed where
-  traverse f (Positive x) = Positive <$> f x
-  traverse f (Negative x) = Negative <$> f x
-
-instance Foldable Signed where
-  foldMap = foldMapDefault
+  deriving (Eq, Ord, Show, Read, Functor, Traversable, Foldable)
 
 instance Applicative Signed where
   pure  = Positive
