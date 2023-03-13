@@ -1,6 +1,6 @@
 name:            boolexpr
 cabal-Version:   >=1.6
-version:         0.1
+version:         0.2
 license:         BSD3
 license-File:    LICENSE
 copyright:       (c) Nicolas Pouillard
