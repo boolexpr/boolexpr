@@ -48,7 +48,10 @@ isVacuouslyFalse (DNF (Disj disjunctions)) = L.null disjunctions
 cannotBeTrue :: Ord a => BoolExpr a -> Bool
 cannotBeTrue = isVacuouslyFalse . simplifyDNF . boolTreeToDNF
 
--- | Apply value substitutions from the supplied map
+-- | Apply Boolean value substitutions to named constants in
+-- the expression, using the supplied map.
+-- The substituted constants are promoted to Boolean literals,
+-- accounting for signedness of the constant.
 subst :: Ord a => Map a Bool -> BoolExpr a -> BoolExpr a
 subst f (BAnd a b) = BAnd (subst f a) (subst f b)
 subst f (BOr a b) = BOr (subst f a) (subst f b)

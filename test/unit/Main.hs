@@ -67,43 +67,43 @@ simplificationTests =
             "Effect of constant literals"
             [ testCase
                 "False input via single literal"
-                $ expectTrue BFalse
+                $ expectCannotBeTrue BFalse
             , testCase
                 "True input via composed literals"
-                $ expectFalse BTrue
+                $ expectCanBeTrue BTrue
             , testCase
                 "False input via composed literals"
-                $ expectTrue
+                $ expectCannotBeTrue
                 $ BOr BFalse BFalse
             , testCase
                 "True input via composed literals"
-                $ expectFalse
+                $ expectCanBeTrue
                 $ BOr BFalse BTrue
             , testCase
                 "Constant OR'd with False"
-                $ expectFalse
+                $ expectCanBeTrue
                 $ BOr BFalse (BConst (Positive "foo"))
             , testCase
                 "Constant OR'd with True"
-                $ expectFalse
+                $ expectCanBeTrue
                 $ BOr (BConst (Positive "foo")) BTrue
             , testCase
                 "Constant AND'd with False"
-                $ expectTrue
+                $ expectCannotBeTrue
                 $ BAnd BFalse (BConst (Positive "foo"))
             , testCase
                 "Constant AND'd with True"
-                $ expectFalse
+                $ expectCanBeTrue
                 $ BAnd (BConst (Positive "foo")) BTrue
             , testCase
                 "Nested Constants AND'd with False within OR"
-                $ expectTrue
+                $ expectCannotBeTrue
                 $ BOr
                   (BAnd BFalse (BConst (Positive "foo")))
                   (BAnd (BConst (Positive "bar")) BFalse)
             , testCase
                 "Deeply nested Constants AND'd with False within OR with multiple negations"
-                $ expectTrue
+                $ expectCannotBeTrue
                 $ BOr
                   (BAnd (BNot BTrue) (BNot (BNot (BNot (BConst (Positive "foo"))))))
                   (BAnd (BConst (Positive "bar")) (BNot (BNot BFalse)))
@@ -112,16 +112,16 @@ simplificationTests =
             "Effect of contradicting named constants"
             [ testCase
                 "via NOT operator"
-                $ expectTrue
+                $ expectCannotBeTrue
                 $ BAnd (BNot (BConst (Positive "foo"))) (BConst (Positive "foo"))
             , testCase
                 "via signedness"
-                $ expectTrue
+                $ expectCannotBeTrue
                 $ BAnd (BConst (Positive "foo")) (BConst (Negative "foo"))
             ]
         ]
     ]
   where
-    expectTrue, expectFalse :: BoolExpr String -> Assertion
-    expectTrue = assertBool "Should have returned true" . cannotBeTrue
-    expectFalse = assertBool "Should have returned false" . not . cannotBeTrue
+    expectCannotBeTrue, expectCanBeTrue :: BoolExpr String -> Assertion
+    expectCannotBeTrue = assertBool "'cannotBeTrue' should have returned true" . cannotBeTrue
+    expectCanBeTrue = assertBool "'cannotBeTrue' should have returned false" . not . cannotBeTrue
