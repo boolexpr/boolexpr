@@ -29,6 +29,7 @@ test-suite unit-tests
                       tasty-hunit                   >= 0.10 && < 0.11,
                       -- Imports shared with the library don't need bounds
                       base,
+                      containers,
                       parsec,
                       boolexpr
     hs-source-dirs:   test/unit

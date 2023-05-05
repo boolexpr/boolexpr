@@ -5,6 +5,7 @@
 module Data.BoolExpr.Simplify (
   cannotBeTrue,
   subst,
+  substMap,
 ) where
 
 import Data.BoolExpr
@@ -48,22 +49,30 @@ isVacuouslyFalse (DNF (Disj disjunctions)) = L.null disjunctions
 cannotBeTrue :: Ord a => BoolExpr a -> Bool
 cannotBeTrue = isVacuouslyFalse . simplifyDNF . boolTreeToDNF
 
--- | Apply Boolean value substitutions to named constants in
--- the expression, using the supplied map.
--- The substituted constants are promoted to Boolean literals,
--- accounting for signedness of the constant.
-subst :: Ord a => Map a Bool -> BoolExpr a -> BoolExpr a
+-- | Apply a function to promote constants to arbitrary
+-- expressions. A generalization of "substMap".
+subst :: (Signed a -> BoolExpr a) -> BoolExpr a -> BoolExpr a
 subst f (BAnd a b) = BAnd (subst f a) (subst f b)
 subst f (BOr a b) = BOr (subst f a) (subst f b)
 subst f (BNot t) = BNot (subst f t)
 subst _ BTrue = BTrue
 subst _ BFalse = BFalse
-subst m c@(BConst x) = case M.lookup varname m of
-  Nothing -> c
-  Just val ->
-    if txform val
-      then BTrue
-      else BFalse
- where
-  (varname, isPositive) = extractConstFromSigned x
-  txform = if isPositive then id else not
+subst f (BConst x) = f x
+
+-- | Apply Boolean value substitutions to named constants in
+-- the expression using the supplied map.
+-- The substituted constants are promoted to Boolean literals,
+-- accounting for signedness of the constant.
+substMap :: Ord a => Map a Bool -> BoolExpr a -> BoolExpr a
+substMap m = subst f
+  where
+    f x = case M.lookup varname m of
+      Nothing -> BConst x
+      Just val ->
+        if txform val
+          then BTrue
+          else BFalse
+      where
+        (varname, isPositive) = extractConstFromSigned x
+        txform = if isPositive then id else not
+

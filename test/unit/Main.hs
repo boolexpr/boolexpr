@@ -6,6 +6,7 @@
 -- BoolExpr unit tests
 module Main where
 
+import qualified Data.Map as M
 import Data.Either (isRight)
 import Data.List (isInfixOf)
 import Test.Tasty (TestTree, defaultMain, testGroup)
@@ -13,7 +14,7 @@ import Text.Parsec
 import Test.Tasty.HUnit
 import Data.BoolExpr
 import Data.BoolExpr.Parser (parseBoolExpr, identifier)
-import Data.BoolExpr.Simplify (cannotBeTrue)
+import Data.BoolExpr.Simplify (cannotBeTrue, substMap)
 
 main :: IO ()
 main = defaultMain tests
@@ -69,7 +70,7 @@ simplificationTests =
                 "False input via single literal"
                 $ expectCannotBeTrue BFalse
             , testCase
-                "True input via composed literals"
+                "True input via single literal"
                 $ expectCanBeTrue BTrue
             , testCase
                 "False input via composed literals"
@@ -120,6 +121,27 @@ simplificationTests =
                 $ BAnd (BConst (Positive "foo")) (BConst (Negative "foo"))
             ]
         ]
+        , testGroup
+          "Substitution"
+          [ testCase
+              "Base example: ambiguous boolean evaluation"
+              $ expectCanBeTrue $ BConst (Positive "foo")
+          , testCase
+              "Substitution example: unambiguous boolean evaluation"
+              $ expectCannotBeTrue $ substMap (M.singleton "foo" False) $ BConst (Positive "foo")
+          , testCase
+              "Base example: ambiguous boolean evaluation, inverted constant"
+              $ expectCanBeTrue $ BConst (Negative "foo")
+          , testCase
+              "Substitution example with inversion: unambiguous boolean evaluation"
+              $ expectCannotBeTrue $ substMap (M.singleton "foo" True) $ BConst (Negative "foo")
+          , testCase
+              "Base example: ambiguous boolean evaluation, multiple constants"
+              $ expectCanBeTrue $ BNot $ BOr (BConst (Positive "foo")) (BConst (Positive "bar"))
+          , testCase
+              "Substitution example: unambiguous boolean evaluation, multiple constants"
+              $ expectCannotBeTrue $ substMap (M.singleton "foo" True) $ BNot $ BOr (BConst (Positive "foo")) (BConst (Positive "bar"))
+          ]
     ]
   where
     expectCannotBeTrue, expectCanBeTrue :: BoolExpr String -> Assertion
