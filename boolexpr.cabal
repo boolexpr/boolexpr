@@ -13,10 +13,11 @@ stability:       Provisional
 build-type:      Simple
 
 library
-  build-depends:   base>=3.0&&<5, parsec, extra
+  build-depends:   base>=3.0&&<5, parsec, extra, containers
   exposed-modules: Data.BoolExpr,
                    Data.BoolExpr.Parser,
-                   Data.BoolExpr.Printer
+                   Data.BoolExpr.Printer,
+                   Data.BoolExpr.Simplify
   ghc-options:     -Wall
   default-language: Haskell98
 
@@ -28,6 +29,7 @@ test-suite unit-tests
                       tasty-hunit                   >= 0.10 && < 0.11,
                       -- Imports shared with the library don't need bounds
                       base,
+                      containers,
                       parsec,
                       boolexpr
     hs-source-dirs:   test/unit
