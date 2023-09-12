@@ -30,6 +30,14 @@ parseabilityTests :: TestTree
 parseabilityTests = testGroup "Parseability" [
       testCase "Parsing a nontrivial expression"
         $ tryParse True "(a OR b) AND (n OR m) NOT (x OR y)"
+    , testCase "Parse 'Haskell'"
+        $ tryParse True "Haskell"
+    , testCase "Parse 'Niki' (test that NOT backtraces)"
+        $ tryParse True "Niki"
+    , testCase "Parse 'ORF' (test that OR backtraces)"
+        $ tryParse True "ORF"
+    , testCase "Parse 'ANDY' (test that AND backtraces)"
+        $ tryParse True "ANDY"
     , testCase "Parsing an empty expression"
         $ tryParse False "()"
     ]
